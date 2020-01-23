@@ -32,7 +32,7 @@ png_infop pInfo;
 int numPasses;
 png_bytep *rows;
 
-int toRGBA565 (unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, unsigned char * pixelExport) {
+void toRGBA565 (unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, unsigned char * pixelExport) {
 	unsigned char redConverted = 0;
 	unsigned char greenConverted = 0;
 	unsigned char blueConverted = 0;
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
     
     // open file
     printf("Opening file %s...\n", argv[1]);
-    char header[8];
+    unsigned char header[8];
     file = fopen(argv[1], "rb");
     if (!file) {
         printf("Could not open file %s.\n", argv[1]);
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
         printf("Could not read PNG header.\n");
         return -1;
     }
-    
+
     // make sure it's a PNG file
     if (png_sig_cmp(header, 0, 8)) {
         printf("File is not a valid PNG file.\n");
