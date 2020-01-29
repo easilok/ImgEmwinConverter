@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <png.h>
 #include <string.h>
+#include <math.h>       /* round, floor, ceil, trunc */
 
 /* #define TEST_OUPUT 1 */
 
@@ -37,9 +38,9 @@ void toRGBA565 (unsigned char red, unsigned char green, unsigned char blue, unsi
 	unsigned char greenConverted = 0;
 	unsigned char blueConverted = 0;
 
-	redConverted = red * 31 / 255;
-	greenConverted = green * 63 / 255;
-	blueConverted = blue * 31 / 255;
+	redConverted = round(red * 31.0f / 255);
+	greenConverted = round(green * 63.0f / 255);
+	blueConverted = round(blue * 31.0f / 255);
 
 	pixelExport[0] = 255 - alpha;
 #ifdef USE_STD_RGB
@@ -49,10 +50,10 @@ void toRGBA565 (unsigned char red, unsigned char green, unsigned char blue, unsi
 	pixelExport[2] = ((greenConverted & 0b111) << (8-3)) & 0b11100000;
 	pixelExport[2] |= (blueConverted & 0b11111);
 #else
-	pixelExport[1] = (blueConverted << (8 - 5)) & 0b11111000;
-	pixelExport[1] |= (greenConverted >> (6 - (8 - 5))) & 0b111;
+	pixelExport[1] = (blueConverted << 3) & 0b11111000;
+	pixelExport[1] |= (greenConverted >> 3) & 0b111;
 
-	pixelExport[2] = ((greenConverted & 0b111) << (8-3)) & 0b11100000;
+	pixelExport[2] = ((greenConverted & 0b111) << 5) & 0b11100000;
 	pixelExport[2] |= (redConverted & 0b11111);
 #endif
 }
@@ -166,7 +167,7 @@ int main(int argc, char* argv[]) {
 				"	#define GUI_CONST_STORAGE const\n"
 				"#endif\n\n"
 				"extern GUI_CONST_STORAGE GUI_BITMAP bm%s;\n\n"
-				"static GUI_CONST_STORAGE unsigned char _ac%s[] = {\n",
+				"IN_EXTERNAL_FLASH static GUI_CONST_STORAGE unsigned char _ac%s[] = {\n",
 				imageName, imageName);
 #endif
 
@@ -182,12 +183,12 @@ int main(int argc, char* argv[]) {
 						// the last pixel shouldn't have a comma
 #ifndef TEST_OUPUT
 						if (y == height-1 && x == width-1)
-								fprintf(outputSource, "0x%x, 0x%x, 0x%x\n};\n", convPixel[0], convPixel[1], convPixel[2]);
+								fprintf(outputSource, "0x%X, 0x%X, 0x%X\n};\n", convPixel[0], convPixel[1], convPixel[2]);
 						else
-								fprintf(outputSource, "0x%x, 0x%x, 0x%x, ", convPixel[0], convPixel[1], convPixel[2]);
+								fprintf(outputSource, "0x%X, 0x%X, 0x%X, ", convPixel[0], convPixel[1], convPixel[2]);
 #else
 
-						fprintf(outputSource, "0x%x, 0x%x, 0x%x\n", convPixel[0], convPixel[1], convPixel[2]);
+						fprintf(outputSource, "0x%X, 0x%X, 0x%X\n", convPixel[0], convPixel[1], convPixel[2]);
 #endif
 						fwrite(convPixel, sizeof(convPixel), 1, outputRaw);
         }
